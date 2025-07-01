@@ -1,0 +1,11 @@
+# Directories
+.venv/
+__pycache__
+
+# Files
+.env
+*.db
+tickers.csv
+
+# IDE Settings
+.vscode
