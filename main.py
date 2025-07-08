@@ -9,6 +9,16 @@ from sentiment.bert import SentimentAnalyzer
 from service.scrapeService import ScrapeService
 from service.queryService import QueryService
 
+"""
+Enhancement ideas:
+    - "score" equation
+    - Allow for continuous scraping throughout the day -> will need to delete most recent entry if day == today
+    - Continuously add to db -> idea: take "today's" and add it to "seed" data
+        - Don't delete DB... continue to add to it... but have to be careful not to double count...
+    - Continue to find ways to scrape data
+"""
+
+
 def main():
     print("Starting thanksCrowd...\n")
 

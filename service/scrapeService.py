@@ -23,19 +23,6 @@ class ScrapeService:
         return
 
     def seed(self) -> None:
-        # Consider scraping only posts? Not comments?
-
-
-        # For days t-6 to t-1 ------->>> todo: Might be able to do more...
-        # Not hitting 1000 limit on most subs... bump to 14 days?
-        # I take that back.... looks like we are hitting it, but almost 1000 of 
-        # the posts are from the previous day, so it appears we're only getting x posts
-
-        # To Consider:
-        # Don't clear the db... just add to it?
-        # I guess if we're seeding every 5 days and not refreshing the db, 
-        # the results will eventually start to accumulate...
-        # !!!!!!! Must be careful not to double-count for the same day
 
         end = time.time() - (60 * 60 * 24)
         start = end - ((60 * 60 * 24) * 5)
