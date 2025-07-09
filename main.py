@@ -1,3 +1,38 @@
+"""
+######################
+### thanksCrowd v2 ###
+######################
+
+
+###################
+### Description ###
+###################
+    
+    ->  An investment tool that scrapes reddit, targets mentions of publicly traded tickers,
+        and analyzes the post's/comment's sentiment. The stocks are then ranked by their 
+        uptick in chatter and positive chatter. 
+    
+        (This is not investment advice)
+
+    
+##############
+### Author ###
+##############
+    
+    ->  Will Towle
+
+        (Open to any enhancement ideas - 
+        this is a side project to facilitate 
+        learning a bit more about Python/SQL)
+
+    
+#############
+### Usage ###
+#############
+    
+    ->  See Makefile
+"""
+
 import sys
 import pandas as pd
 
@@ -9,22 +44,14 @@ from sentiment.bert import SentimentAnalyzer
 from service.scrapeService import ScrapeService
 from service.queryService import QueryService
 
-"""
-Enhancement ideas:
-    - "score" equation
-    - Allow for continuous scraping throughout the day -> will need to delete most recent entry if day == today
-    - Continuously add to db -> idea: take "today's" and add it to "seed" data
-        - Don't delete DB... continue to add to it... but have to be careful not to double count...
-    - Continue to find ways to scrape data
-"""
-
-
 def main():
-    print("Starting thanksCrowd...\n")
+    print("\nStarting thanksCrowd...\n")
 
     args = sys.argv[1:]
     if len(args) > 0:
-        if args[0] == "seed":
+        if args[0] == "clean":
+            clean()
+        elif args[0] == "seed":
             seed()
         elif args[0] == "scrape":
             scrape()
@@ -40,6 +67,16 @@ def main():
             return
     else:
         print("Must provide argument [scrape | query | d]")
+
+def clean():
+    print("Staring DB clean...\n")
+
+    db = Database()
+    if db.clean():
+        print("DB cleaned...\n")
+        return
+    
+    print("DB clean failed...\n")
 
 def seed():
     config = Config()
@@ -89,7 +126,7 @@ def query():
 def display_results(ticker: str = None):
     df = pd.read_csv("results.csv")
     if ticker is not None:
-        print(df[df['ticker'] == ticker])
+        print(df[df['ticker'] == ticker] if len(df[df['ticker'] == ticker]) > 0 else "Ticker not found...")
     else:
         print(df)
 

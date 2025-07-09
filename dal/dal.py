@@ -29,15 +29,44 @@ class Database:
     def __init__(self):
         self.session = Session()
 
-    def get(self, ticker):
+    def clean(self) -> bool:
+        today = datetime.now(pytz.timezone('US/Eastern')).replace(hour=0, minute=0, second=0, microsecond=0)
+
+
         try:
-            data = self.session.query(Entry).filter(Entry.ticker == ticker).order_by(Entry.date.desc()).all()
-            return data
+            oldest_date = self.session.query(Entry).order_by(Entry.date).first().date
+
+            # Fetch all previous Entries with date < today
+            entries = self.session.query(Entry).filter(Entry.date < today).all()
+
+            for entry in entries:
+                # Get the earliest entry for that ticker
+                earliest_entry = (
+                    self.session.query(Entry)
+                    .filter(Entry.ticker == entry.ticker)
+                    .order_by(Entry.date)
+                    .first()
+                )
+
+                if earliest_entry and earliest_entry.date != oldest_date:
+                    entry.date = oldest_date
+                elif earliest_entry and earliest_entry.date != entry.date:
+                    # Add that entry's value to the earliest entry for that ticker
+                    earliest_entry.total_count += entry.total_count
+                    earliest_entry.positive_count += entry.positive_count
+
+                    # Delete that entry
+                    self.session.delete(entry)
+
+            self.session.commit()
+            return True
+        
         except SQLAlchemyError as e:
-            print(f"error while getting {ticker} from db: {e}")
-            return []
+            print(f"error occurred while cleaning db: {e}")
+            return False
         finally:
             self.session.close()
+
 
     def increment(self, ticker: str, timestamp: float, isPositive: bool) -> None:
         timestamp = datetime.fromtimestamp(timestamp, pytz.timezone('US/Eastern')).replace(hour=0, minute=0, second=0, microsecond=0)
